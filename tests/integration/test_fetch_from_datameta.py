@@ -34,7 +34,8 @@ class CogdatIntegrationTest(unittest.TestCase):
         self.yaml_file = "cogdat_test.yml"
 
     def tearDown(self):
-        os.remove(self.yaml_file)
+        if os.path.isfile(self.yaml_file):
+            os.remove(self.yaml_file)
 
     def test_get_records_from_datameta_and_add_execution_on_files(self):
         response = services.fetch_records(CogdatFetcher())
@@ -54,3 +55,10 @@ class CogdatIntegrationTest(unittest.TestCase):
                     assert execution.result["AssemblyFA"] == "banana puree"
                     assert execution.result["RawFQ1"] == "potato puree"
                     assert execution.result["RawFQ2"] == "apple puree"
+
+    def test_compare_local_and_remote(self):
+        pass
+
+    def test_add_missing_records_from_remote(self):
+        # TODO: Be sure that no local records are overwritten
+        pass
