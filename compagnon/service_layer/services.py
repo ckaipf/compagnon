@@ -2,7 +2,7 @@ import datetime
 from typing import Dict, List, Type
 
 import compagnon.domain.model as model
-from compagnon.fetchers.fetchers import CogdatFetcher
+from compagnon.fetchers.fetchers import AbstractFetcher
 from compagnon.service_layer.unit_of_work import AbstractUnitOfWork
 
 
@@ -29,10 +29,8 @@ def add_execution_to_records(
         uow.commit()
 
 
-def get_records_from_datameta() -> List[model.Record]:
-    cogdat_fetcher = CogdatFetcher()
-    response = cogdat_fetcher.list()
-    return response
+def fetch_records(fetcher: AbstractFetcher) -> List[model.Record]:
+    return fetcher.list()
 
 
 def get_foreign_ids(
