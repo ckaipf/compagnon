@@ -5,7 +5,7 @@ from typing import Any, Dict
 import requests
 from datameta_client import files
 
-from compagnon.domain.model import ExecutionFactory, Record
+from compagnon.domain.model import ExecutionFactory
 
 
 def download_file(url: str, path: str) -> str:
@@ -29,11 +29,10 @@ def data_parser(record: dict):
     return record["file_ids"]
 
 
-def command(file_ids: str):
-
-    result = dict()   
-    for file_name, file_ids in file_ids.items():
-        response = files.download_url(file_ids["site"])
+def command(file_ids: Dict[str, Dict[str, str]]):
+    result = dict()
+    for file_name, file_id in file_ids.items():
+        response = files.download_url(file_id["site"])
         file_url = response["file_url"]
 
         with tempfile.TemporaryDirectory() as tmp_dir:
