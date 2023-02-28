@@ -2,6 +2,8 @@ import abc
 import datetime
 from typing import Any, Dict, List
 
+import datameta_client
+
 import compagnon.domain.model as model
 
 
@@ -20,8 +22,8 @@ class AbstractFetcher(abc.ABC):
 
 
 class CogdatFetcher(AbstractFetcher):
-    def __init__(self, dm_client):
-        self.dm_client = dm_client
+    def __init__(self):
+        self.dm_client = datameta_client
 
     def to_record(self, raw_record: Any) -> model.Record:
         return model.Record(

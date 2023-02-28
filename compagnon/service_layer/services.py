@@ -30,9 +30,7 @@ def add_execution_to_records(
 
 
 def get_records_from_datameta() -> List[model.Record]:
-    import datameta_client
-
-    cogdat_fetcher = CogdatFetcher(datameta_client)
+    cogdat_fetcher = CogdatFetcher()
     response = cogdat_fetcher.list()
 
     return [(record) for record in response]
@@ -43,13 +41,3 @@ def get_foreign_ids(
 ) -> List[str]:
     with uow:
         return [record.foreign_id for record in uow.records.list()]
-
-
-# "YniXRJLVVFRpIHhYwlnLlo1dNNpX2DlF4OoEft3yl3mjg8MPKltaIpi7Lg7e6P7s"
-# def create_kraken_execution() -> model.KrakenExecutionFactory:
-#     execution = model.KrakenExecutionFactory
-#     execution.add_execution_name("Kraken")
-#     execution.add_command(lambda x: x["x"] + 1)
-#     execution.add_result_parser(lambda x: {"x": x})
-#     execution.add_data_parser(lambda x: x)
-#     return execution
