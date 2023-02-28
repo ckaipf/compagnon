@@ -32,8 +32,7 @@ def add_execution_to_records(
 def get_records_from_datameta() -> List[model.Record]:
     cogdat_fetcher = CogdatFetcher()
     response = cogdat_fetcher.list()
-
-    return [(record) for record in response]
+    return response
 
 
 def get_foreign_ids(
