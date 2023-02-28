@@ -6,13 +6,25 @@ from compagnon.fetchers.fetchers import AbstractFetcher
 from compagnon.service_layer.unit_of_work import AbstractUnitOfWork
 
 
+class InvalidRecord(Exception):
+    pass
+
+
+class InvalidLocalState(Exception):
+    pass
+
+
 def add_records(
     records: List[model.Record],
     uow: AbstractUnitOfWork,
 ) -> str:
     with uow:
         for record in records:
-            uow.records.add(record)
+            try:
+                if uow.records.get(record.foreign_id):
+                    raise InvalidRecord(f"Record {record.foreign_id} already exists")
+            except KeyError:
+                uow.records.add(record)
         uow.commit()
 
 
@@ -33,8 +45,45 @@ def fetch_records(fetcher: AbstractFetcher) -> List[model.Record]:
     return fetcher.list()
 
 
-def get_foreign_ids(
+def compare_local_and_remote(
     uow: AbstractUnitOfWork,
-) -> List[str]:
+    fetcher: AbstractFetcher,
+) -> bool:
     with uow:
-        return [record.foreign_id for record in uow.records.list()]
+        local = set(get_foreign_ids(uow.records.list()))
+    retrived = set(get_foreign_ids(fetch_records(fetcher)))
+
+    local_, intersection, retrived_ = (
+        bool(local - retrived),
+        bool(local & retrived),
+        bool(retrived - local),
+    )
+
+    if local_:
+        raise InvalidLocalState(f"Local records {local_} not in remote")
+    if not intersection:
+        pass  # TODO: log warning that intersection is empty
+    if retrived_:
+        return True
+    return False
+
+
+def add_missing_records(
+    uow: AbstractUnitOfWork,
+    fetcher: AbstractFetcher,
+):
+    if compare_local_and_remote(uow, fetcher):
+        with uow:
+            remote_records = fetch_records(fetcher)
+            local_records = uow.records.list()
+            not_added_yet = [
+                record
+                for record in remote_records
+                if record.foreign_id not in get_foreign_ids(local_records)
+            ]
+            add_records(uow, not_added_yet)
+            uow.commit()
+
+
+def get_foreign_ids(records: List[model.Record]) -> List[str]:
+    return [record.foreign_id for record in records]

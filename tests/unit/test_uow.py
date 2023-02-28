@@ -51,7 +51,11 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
         with self.assertRaises(AttributeError):
             uow_.records
 
-        assert set(services.get_foreign_ids(uow_)) | set(services.get_foreign_ids(uow))
+        with uow_:
+            with uow:
+                assert set(services.get_foreign_ids(uow_.records.list())) | set(
+                    services.get_foreign_ids(uow.records.list())
+                )
 
         for record in uow_.records.list():
             record_ = uow.records.get(record.foreign_id)
