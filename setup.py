@@ -13,6 +13,7 @@ setup(
         "datameta-client",
         "pyyaml",
         "SQLAlchemy",
+        "psycopg2",
     ],
     extras_require={
         "tests": ["flake8", "pytest", "pytest-cov"],
