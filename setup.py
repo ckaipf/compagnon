@@ -12,12 +12,9 @@ setup(
     install_requires=[
         "datameta-client",
         "pyyaml",
+        "SQLAlchemy",
     ],
     extras_require={
         "tests": ["flake8", "pytest", "pytest-cov"],
-        "postgres": [
-            "psycopg2-binary",
-            "SQLAlchemy",
-        ],
     },
 )
