@@ -14,7 +14,7 @@ setup(
         "pyyaml",
     ],
     extras_require={
-        "tests": ["pytest", "pytest-cov"],
+        "tests": ["flake8", "pytest", "pytest-cov"],
         "postgres": [
             "psycopg2-binary",
             "SQLAlchemy",
