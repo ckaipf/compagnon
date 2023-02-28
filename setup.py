@@ -14,6 +14,7 @@ setup(
         "pyyaml",
         "SQLAlchemy",
         "psycopg2",
+        "psycopg2-binary",
     ],
     extras_require={
         "tests": ["flake8", "pytest", "pytest-cov"],
