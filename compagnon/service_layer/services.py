@@ -19,24 +19,14 @@ def add_records(
 def add_execution_to_records(
     execution: model.ExecutionFactory,
     uow: AbstractUnitOfWork,
-) -> str:
+) -> None:
     with uow:
         records = uow.records.list()
         for record in records:
-            execution_id = "_".join(
-                [
-                    execution.execution_name,
-                    record.foreign_id,
-                    datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
-                ]
-            )
-            e = execution(execution_id)
-            e.add_execution_id("_".join([execution_id, str(record.foreign_id)]))
+            e = execution(record, datetime.datetime.now())
             record.add_execution(e)
             uow.records.add(record)
         uow.commit()
-
-    return execution_id
 
 
 def get_records_from_datameta() -> List[model.Record]:

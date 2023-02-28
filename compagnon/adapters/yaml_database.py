@@ -12,6 +12,7 @@ def record_representer(
         "!Record",
         {
             "foreign_id": record.foreign_id,
+            "creation_time": record.creation_time,
             "data": record.data,
             "executions": record.executions,
         },
@@ -25,6 +26,8 @@ def execution_representer(
         "!Execution",
         {
             "execution_id": execution.execution_id,
+            "record": execution.record,
+            "creation_time": execution.creation_time,
             "execution_name": execution.execution_name,
             "result": execution.result,
         },
@@ -41,13 +44,13 @@ def get_dumper():
 def record_constructor(
     loader: yaml.SafeLoader, node: yaml.nodes.MappingNode
 ) -> model.Record:
-    return model.Record(**loader.construct_mapping(node)) # type: ignore
+    return model.Record(**loader.construct_mapping(node))  # type: ignore
 
 
 def execution_constructor(
     loader: yaml.SafeLoader, node: yaml.nodes.MappingNode
 ) -> model.ExecutionFactory:
-    return model.ExecutionFactory(**loader.construct_mapping(node)) # type: ignore
+    return model.ExecutionFactory(**loader.construct_mapping(node))  # type: ignore
 
 
 def get_loader():

@@ -1,4 +1,5 @@
 import abc
+import datetime
 from typing import Any, Dict, List
 
 import compagnon.domain.model as model
@@ -23,7 +24,11 @@ class CogdatFetcher(AbstractFetcher):
         self.dm_client = dm_client
 
     def to_record(self, raw_record: Any) -> model.Record:
-        return model.Record(foreign_id=raw_record["id"]["site"], data=raw_record)
+        return model.Record(
+            foreign_id=raw_record["id"]["site"],
+            data=raw_record,
+            creation_time=datetime.datetime.now(),
+        )
 
     def get(self, foreign_id) -> model.Record:
         raise NotImplementedError

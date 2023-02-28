@@ -1,5 +1,7 @@
 # pylint: disable=redefined-outer-name
 
+from datetime import datetime
+
 import pytest
 
 # from requests.exceptions import ConnectionError
@@ -9,7 +11,7 @@ from sqlalchemy.orm import clear_mappers, sessionmaker
 # import requests
 from compagnon import config
 from compagnon.adapters.orm import metadata, start_mappers
-from compagnon.domain.model import ExecutionFactory
+from compagnon.domain.model import ExecutionFactory, Record
 
 pytest_plugins = ["conftest_cogdat_integration"]
 
@@ -71,3 +73,8 @@ def add_one_execution():
     addition.add_result_parser(lambda x: {"y": x})
     addition.add_execution_name("addition")
     return addition
+
+
+@pytest.fixture()
+def one_record():
+    return Record(str(1), data={"x": 1}, creation_time=datetime.datetime.now())

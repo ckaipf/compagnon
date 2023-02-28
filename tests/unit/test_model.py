@@ -1,3 +1,4 @@
+import datetime
 import random
 import string
 import unittest
@@ -31,31 +32,30 @@ class ModelTestCase(unittest.TestCase):
         assert self.addition.result_parser(2) == {"y": 2}
 
     def test_execution(self):
-        test_addition = self.addition(
-            execution_id="".join(random.choices(string.ascii_lowercase, k=5))
+        record = Record(
+            foreign_id="abc", data={"x": 1}, creation_time=datetime.datetime.now()
         )
-        test_addition.execute(data={"x": 1})
+        test_addition = self.addition(record, creation_time=datetime.datetime.now())
+        test_addition.execute()
         assert test_addition.result == {"y": 2}
 
     def test_result_is_immutable(self):
-        test_addition = self.addition(
-            execution_id="".join(random.choices(string.ascii_lowercase, k=5))
+        record = Record(
+            foreign_id="abc", data={"x": 1}, creation_time=datetime.datetime.now()
         )
-        test_addition.execute(data={"x": 1})
-        self.assertRaises(AttributeError, test_addition.execute, data={"x": 2})
+        test_addition = self.addition(record, creation_time=datetime.datetime.now())
+        test_addition.execute()
+        self.assertRaises(AttributeError, test_addition.execute)
         assert test_addition.result == {"y": 2}
 
     def test_add_execution_to_record(self):
-        record = Record(foreign_id="abc", data={"x": 1})
-        record.add_execution(
-            self.addition(
-                execution_id="".join(random.choices(string.ascii_lowercase, k=5))
-            )
+        record = Record(
+            foreign_id="abc", data={"x": 1}, creation_time=datetime.datetime.now()
         )
-        assert record.executions[0].result == {"y": 2}
-        record.add_execution(
-            self.subtraction(
-                execution_id="".join(random.choices(string.ascii_lowercase, k=5))
-            )
-        )
-        assert record.executions[1].result == {"y": 0}
+        e = self.addition(record, creation_time=datetime.datetime.now())
+        record.add_execution(e)
+        assert record.executions[-1].result == {"y": 2}
+
+        e = self.subtraction(record, creation_time=datetime.datetime.now())
+        record.add_execution(e)
+        assert record.executions[-1].result == {"y": 0}

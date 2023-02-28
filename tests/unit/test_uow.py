@@ -1,5 +1,6 @@
 import os
 import unittest
+from datetime import datetime
 
 import compagnon.domain.model as model
 import compagnon.service_layer.services as services
@@ -8,7 +9,10 @@ import compagnon.service_layer.unit_of_work as unit_of_work
 
 class YamlUnitOfWorkTestCase(unittest.TestCase):
     def setUp(self):
-        self.records = [model.Record(str(x), {"x": x}) for x in range(5)]
+        self.records = [
+            model.Record(str(x), {"x": x}, creation_time=datetime.now())
+            for x in range(5)
+        ]
         self.yaml_file = "test.yaml"
         self.addition = model.ExecutionFactory
         self.addition.add_data_parser(lambda x: x["x"])
