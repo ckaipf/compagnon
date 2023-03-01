@@ -9,6 +9,7 @@ from sqlalchemy.orm.session import Session
 import compagnon.adapters.repository as repository
 from compagnon import config
 from compagnon.adapters.yaml_database import YamlDataBase
+from compagnon.service_layer import messagebus
 
 
 class AbstractUnitOfWork(abc.ABC):
@@ -17,11 +18,23 @@ class AbstractUnitOfWork(abc.ABC):
     def __enter__(self):
         pass
 
+    def publish_events(self):
+        for record in self.records.seen.values():
+            while record.events:
+                event = record.events.pop(0)
+                messagebus.handle(event)
+
+
     def __exit__(self, *args):
         self.rollback()
 
-    @abc.abstractmethod
+    
     def commit(self):
+        self._commit()
+        self.publish_events()
+
+    @abc.abstractmethod
+    def _commit(self):
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -34,7 +47,7 @@ class SetUnitOfWork(AbstractUnitOfWork):
         self.records = repository.DictRepository([])
         self.committed = False
 
-    def commit(self):
+    def _commit(self):
         self.committed = True
 
     def rollback(self):
@@ -61,7 +74,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         super().__exit__(*args)
         self.session.close()
 
-    def commit(self):
+    def _commit(self):
         self.session.commit()
 
     def rollback(self):
@@ -79,8 +92,9 @@ class YamlUnitOfWork(AbstractUnitOfWork):
     def __exit__(self, *args):
         super().__exit__(*args)
 
-    def commit(self):
+    def _commit(self):
         self.yaml_database.dump(self.records.list())
 
     def rollback(self):
         pass
+        
