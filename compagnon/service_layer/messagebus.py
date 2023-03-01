@@ -9,7 +9,7 @@ def handle(event: events.Event):
 
 
 def send_out_of_stock_notification(event: events.AddRecord):
-    print("Event")
+    pass
 
 
 HANDLERS = {

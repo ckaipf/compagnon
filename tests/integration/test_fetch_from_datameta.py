@@ -3,8 +3,10 @@ import unittest
 
 import pytest
 
+import compagnon.domain.model as model
 import compagnon.service_layer.services as services
 from compagnon.fetchers.fetchers import CogdatFetcher
+from compagnon.service_layer.batchables import add_missing_records, execute_executions
 from compagnon.service_layer.executions.smoothie import SmoothieExecution
 from compagnon.service_layer.unit_of_work import YamlUnitOfWork
 
@@ -30,35 +32,71 @@ def test_cogdat_instance_has_target_metadataset(ensure_metadataset_is_submitted)
     "Skipping test that requires CoGDat instance.",
 )
 class CogdatIntegrationTest(unittest.TestCase):
+    yaml_file = "cogdat_test.yml"
+
     def setUp(self):
-        self.yaml_file = "cogdat_test.yml"
+        self.ims_ids = [
+            "IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXYY",
+        ]
 
     def tearDown(self):
         if os.path.isfile(self.yaml_file):
             os.remove(self.yaml_file)
 
-    def test_get_records_from_datameta_and_add_execution_on_files(self):
+    def test_fetch_from_cogdat(self):
         response = services.fetch_records(CogdatFetcher())
-        uow = YamlUnitOfWork(self.yaml_file)
-        target = [
+        retrived = [
             record
             for record in response
-            if record.data.get("record").get("IMS-ID")
-            == "IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXYY"
+            if record.data.get("record").get("IMS-ID") in self.ims_ids
         ]
-        services.add_records(target, uow)
-        services.add_execution_to_records(SmoothieExecution, uow)
+        assert retrived
+        return retrived
 
+    def test_fetch_and_store_records_from_cogdat(self):
+        records = services.fetch_records(CogdatFetcher())
+        uow = YamlUnitOfWork(self.yaml_file)
+        services.add_records(records, uow)
+        del uow
+        uow = YamlUnitOfWork(self.yaml_file)
         with uow:
             for record in uow.records.list():
-                for execution in record.executions:
-                    assert execution.result["AssemblyFA"] == "banana puree"
-                    assert execution.result["RawFQ1"] == "potato puree"
-                    assert execution.result["RawFQ2"] == "apple puree"
+                assert record.foreign_id in (record.foreign_id for record in records)
 
-    def test_compare_local_and_remote(self):
-        pass
+    def test_executions_are_committed_to_db(self):
+        records = services.fetch_records(CogdatFetcher())
+        uow = YamlUnitOfWork(self.yaml_file)
+        services.add_records(records, uow)
+        services.add_execution_to_records(SmoothieExecution, uow)
+        del uow
+        uow = YamlUnitOfWork(self.yaml_file)
+        with uow:
+            for record in uow.records.list():
+                assert record.executions[-1].__class__ == SmoothieExecution
+                assert not record.executions[-1].result
 
-    def test_add_missing_records_from_remote(self):
-        # TODO: Be sure that no local records are overwritten
-        pass
+    def test_batch_execution(self):
+        uow = YamlUnitOfWork(self.yaml_file)
+        services.add_records(self.test_fetch_from_cogdat(), uow)
+        services.add_execution_to_records(SmoothieExecution, uow)
+        execute_executions(uow)
+
+        uow = YamlUnitOfWork(self.yaml_file)
+        with uow:
+            for record in uow.records.list():
+                print(record)
+                assert record.executions[-1].result["RawFQ1"] == "potato puree"
+                assert record.executions[-1].result["RawFQ2"] == "apple puree"
+                assert record.executions[-1].result["AssemblyFA"] == "banana puree"
+
+
+# def test_compare_local_and_remote(self):
+#     pass
+
+# def test_add_missing_records_from_remote(self):
+#     # TODO: Be sure that no local records are overwritten
+#     pass
+
+
+# test no records added
+# test no executions added

@@ -70,7 +70,6 @@ class Record:
         self.events.append(events.AddRecord())
 
     def add_execution(self, execution: ExecutionFactory):
-        execution.execute()
         self.executions.append(execution)
         self.events.append(events.AddExecution())
         return

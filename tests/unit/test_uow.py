@@ -37,6 +37,7 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
         retrived = uow.records
         for record in self.records:
             first_execution = retrived.get(record.foreign_id).executions[0]
+            first_execution.execute()
             assert first_execution.result["y"] == record.data["x"] + 1
 
     def test_save_and_load_records_with_executions_to_yaml(self):

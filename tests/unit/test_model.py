@@ -54,8 +54,10 @@ class ModelTestCase(unittest.TestCase):
         )
         e = self.addition(record, creation_time=datetime.datetime.now())
         record.add_execution(e)
+        e.execute()
         assert record.executions[-1].result == {"y": 2}
 
         e = self.subtraction(record, creation_time=datetime.datetime.now())
         record.add_execution(e)
+        e.execute()
         assert record.executions[-1].result == {"y": 0}
