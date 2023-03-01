@@ -65,7 +65,6 @@ class YamlDataBase:
         self.file_path = file_path
 
     def load(self) -> List[model.Record]:
-        print("loading")
         try:
             with open(self.file_path, encoding="utf-8") as file_path:
                 records: List[model.Record]
@@ -83,7 +82,6 @@ class YamlDataBase:
             return []
 
     def dump(self, records: List[model.Record]):
-        print("dumping")
         with open(self.file_path, "w+", encoding="utf-8") as file_path:
             dump = yaml.dump(records, Dumper=get_dumper())
             file_path.write(dump)
