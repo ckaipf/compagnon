@@ -14,16 +14,23 @@ class InvalidLocalState(Exception):
     pass
 
 
+def is_valid_record(record: model.Record, records: List[model.Record]) -> bool:
+    if record in records:
+        raise InvalidRecord(f"Record {record.foreign_id} already exists")
+    return True
+
+
+def is_valid_execution(execution: model.ExecutionFactory) -> bool:
+    return True
+
+
 def add_records(
     records: List[model.Record],
     uow: AbstractUnitOfWork,
 ) -> str:
     with uow:
         for record in records:
-            try:
-                if uow.records.get(record.foreign_id):
-                    raise InvalidRecord(f"Record {record.foreign_id} already exists")
-            except KeyError:
+            if is_valid_record(record, uow.records.list()):
                 uow.records.add(record)
         uow.commit()
 
@@ -36,8 +43,8 @@ def add_execution_to_records(
         records = uow.records.list()
         for record in records:
             e = execution(record, datetime.datetime.now())
-            record.add_execution(e)
-            uow.records.add(record)
+            if is_valid_execution(e):
+                record.add_execution(e)
         uow.commit()
 
 
