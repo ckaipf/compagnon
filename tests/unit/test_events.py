@@ -15,3 +15,7 @@ def test_records_out_of_stock_event_if_cannot_allocate(add_one_execution):
         add_one_execution(record, creation_time=datetime.datetime.now())
     )
     assert record.events[-1] == events.AddExecution()
+
+
+def test_message_bus_handler():
+    pass
