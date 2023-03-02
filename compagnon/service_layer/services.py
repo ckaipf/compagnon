@@ -52,7 +52,7 @@ def fetch_records(fetcher: AbstractFetcher) -> List[model.Record]:
     return fetcher.list()
 
 
-def compare_local_and_remote(
+def exist_unseen_records_in_remote(
     uow: AbstractUnitOfWork,
     fetcher: AbstractFetcher,
 ) -> bool:
