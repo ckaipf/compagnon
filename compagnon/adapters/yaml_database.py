@@ -81,6 +81,7 @@ class YamlDataBase:
         except IOError:
             return []
 
+    # TODO: Dump only records that have been changed, lock file?
     def dump(self, records: List[model.Record]):
         with open(self.file_path, "w+", encoding="utf-8") as file_path:
             dump = yaml.dump(records, Dumper=get_dumper())
