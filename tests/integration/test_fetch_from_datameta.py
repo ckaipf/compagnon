@@ -4,9 +4,9 @@ import unittest
 import pytest
 
 import compagnon.domain.model as model
+import compagnon.service_layer.batchables as batchables
 import compagnon.service_layer.services as services
 from compagnon.fetchers.fetchers import CogdatFetcher
-from compagnon.service_layer.batchables import add_missing_records, execute_executions
 from compagnon.service_layer.executions.smoothie import SmoothieExecution
 from compagnon.service_layer.unit_of_work import YamlUnitOfWork
 
@@ -38,6 +38,7 @@ class CogdatIntegrationTest(unittest.TestCase):
         self.ims_ids = [
             "IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXYY",
         ]
+        self.uow = YamlUnitOfWork(self.yaml_file)
 
     def tearDown(self):
         if os.path.isfile(self.yaml_file):
@@ -65,25 +66,28 @@ class CogdatIntegrationTest(unittest.TestCase):
 
     def test_executions_are_committed_to_db(self):
         records = services.fetch_records(CogdatFetcher())
-        uow = YamlUnitOfWork(self.yaml_file)
-        services.add_records(records, uow)
-        services.add_execution_to_records(SmoothieExecution, uow)
-        del uow
-        uow = YamlUnitOfWork(self.yaml_file)
-        with uow:
-            for record in uow.records.list():
+        services.add_records(records, self.uow)
+        services.add_execution_to_records(SmoothieExecution, self.uow)
+        with self.uow:
+            for record in self.uow.records.list():
                 assert record.executions[-1].__class__ == SmoothieExecution
                 assert not record.executions[-1].result
 
-    def test_batch_execution(self):
-        uow = YamlUnitOfWork(self.yaml_file)
-        services.add_records(self.test_fetch_from_cogdat(), uow)
-        services.add_execution_to_records(SmoothieExecution, uow)
-        execute_executions(uow)
+    def test_local_state_is_not_equal_to_remote(self):
+        assert services.exist_unseen_records_in_remote(self.uow, CogdatFetcher())
 
-        uow = YamlUnitOfWork(self.yaml_file)
-        with uow:
-            for record in uow.records.list():
+    def test_add_missing_records_from_remote(self):
+        assert services.exist_unseen_records_in_remote(self.uow, CogdatFetcher())
+        batchables.add_missing_records_from_remote(self.uow, CogdatFetcher())
+        assert not services.exist_unseen_records_in_remote(self.uow, CogdatFetcher())
+
+    def test_batch_execution(self):
+        services.add_records(self.test_fetch_from_cogdat(), self.uow)
+        services.add_execution_to_records(SmoothieExecution, self.uow)
+        batchables.execute_executions(self.uow)
+
+        with self.uow:
+            for record in self.uow.records.list():
                 print(record)
                 assert record.executions[-1].result["RawFQ1"] == "potato puree"
                 assert record.executions[-1].result["RawFQ2"] == "apple puree"
