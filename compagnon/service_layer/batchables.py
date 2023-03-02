@@ -4,7 +4,7 @@ import compagnon.domain.model as model
 from compagnon.fetchers.fetchers import AbstractFetcher
 from compagnon.service_layer.services import (
     add_records,
-    compare_local_and_remote,
+    exist_unseen_records_in_remote,
     fetch_records,
     get_foreign_ids,
 )
@@ -37,23 +37,23 @@ def batched(batch_size: int = 10):
 
 
 @batched(batch_size=10)
-def add_missing_records(
+def add_missing_records_from_remote(
     uow: AbstractUnitOfWork,
     fetcher: AbstractFetcher,
     batch_size: int = 10,
 ) -> bool:
     finished = False
-    if compare_local_and_remote(uow, fetcher):
+    if exist_unseen_records_in_remote(uow, fetcher):
+        remote_records = fetch_records(fetcher)
         with uow:
-            remote_records = fetch_records(fetcher)
             local_records = uow.records.list()
-            not_added_yet = [
-                record
-                for record in remote_records
-                if record.foreign_id not in get_foreign_ids(local_records)
-            ]
-            add_records(uow, not_added_yet[:batch_size])
-            uow.commit()
+
+        not_added_yet = [
+            record
+            for record in remote_records
+            if record.foreign_id not in get_foreign_ids(local_records)
+        ]
+        add_records(not_added_yet[:batch_size], uow)
     else:
         finished = True
     return finished
