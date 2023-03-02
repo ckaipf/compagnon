@@ -2,7 +2,7 @@ import abc
 import datetime
 from typing import Any, Dict, List
 
-import datameta_client
+from datameta_client import metadatasets
 
 import compagnon.domain.model as model
 
@@ -22,9 +22,6 @@ class AbstractFetcher(abc.ABC):
 
 
 class CogdatFetcher(AbstractFetcher):
-    def __init__(self):
-        self.dm_client = datameta_client
-
     def to_record(self, raw_record: Any) -> model.Record:
         return model.Record(
             foreign_id=raw_record["id"]["site"],
@@ -36,7 +33,4 @@ class CogdatFetcher(AbstractFetcher):
         raise NotImplementedError
 
     def list(self) -> List[model.Record]:
-        return [
-            self.to_record(raw_record)
-            for raw_record in self.dm_client.metadatasets.search()
-        ]
+        return [self.to_record(raw_record) for raw_record in metadatasets.search()]
