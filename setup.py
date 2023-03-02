@@ -6,7 +6,7 @@ setup(
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "compagnon=compagnon.__main__:app",
+            "compagnon=compagnon.entrypoints.app:app",
         ]
     },
     install_requires=[
