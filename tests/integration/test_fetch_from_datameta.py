@@ -88,7 +88,6 @@ class CogdatIntegrationTest(unittest.TestCase):
 
         with self.uow:
             for record in self.uow.records.list():
-                print(record)
                 assert record.executions[-1].result["RawFQ1"] == "potato puree"
                 assert record.executions[-1].result["RawFQ2"] == "apple puree"
                 assert record.executions[-1].result["AssemblyFA"] == "banana puree"
