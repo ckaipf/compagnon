@@ -3,6 +3,7 @@
 from datetime import datetime
 
 import pytest
+
 # from requests.exceptions import ConnectionError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import clear_mappers, sessionmaker
@@ -10,7 +11,7 @@ from sqlalchemy.orm import clear_mappers, sessionmaker
 # import requests
 from compagnon import config
 from compagnon.adapters.orm import metadata, start_mappers
-from compagnon.domain.model import ExecutionFactory, Record
+from compagnon.domain.model import AbstractExecution, Record
 
 pytest_plugins = ["conftest_cogdat_integration"]
 
@@ -66,8 +67,9 @@ def session_factory(in_memory_db):
 
 @pytest.fixture()
 def add_one_execution():
-    class Addition(ExecutionFactory):
+    class Addition(AbstractExecution):
         execution_name = "addition"
+
         def data_parser(cls, x):
             return x["x"]
 

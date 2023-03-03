@@ -12,7 +12,7 @@ from compagnon.domain.events import Event
 
 
 @dataclass
-class ExecutionFactory(abc.ABC):
+class AbstractExecution(abc.ABC):
     record: Record
     creation_time: date
     execution_id: str = ""
@@ -60,13 +60,13 @@ class Record:
     foreign_id: str
     data: Dict[str, Any]
     creation_time: date
-    executions: List[ExecutionFactory] = field(default_factory=list)
+    executions: List[AbstractExecution] = field(default_factory=list)
     events: List[Event] = field(default_factory=list)
 
     def __post_init__(self):
         self.events.append(events.AddRecord())
 
-    def add_execution(self, execution: ExecutionFactory):
+    def add_execution(self, execution: AbstractExecution):
         self.executions.append(execution)
         self.events.append(events.AddExecution())
         return

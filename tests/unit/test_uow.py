@@ -15,7 +15,7 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
         ]
         self.yaml_file = "test.yaml"
 
-        class Addition(model.ExecutionFactory):
+        class Addition(model.AbstractExecution):
             execution_name = "addition"
 
             def data_parser(self, x):

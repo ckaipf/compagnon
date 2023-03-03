@@ -20,7 +20,7 @@ def is_valid_record(record: model.Record, records: List[model.Record]) -> bool:
     return True
 
 
-def is_valid_execution(execution: model.ExecutionFactory) -> bool:
+def is_valid_execution(execution: model.AbstractExecution) -> bool:
     return True
 
 
@@ -36,7 +36,7 @@ def add_records(
 
 
 def add_execution_to_records(
-    execution: model.ExecutionFactory,
+    execution: model.AbstractExecution,
     uow: AbstractUnitOfWork,
 ) -> None:
     with uow:

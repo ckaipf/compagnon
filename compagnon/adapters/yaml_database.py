@@ -20,7 +20,7 @@ def record_representer(
 
 
 def execution_representer(
-    dumper: yaml.SafeDumper, execution: model.ExecutionFactory
+    dumper: yaml.SafeDumper, execution: model.AbstractExecution
 ) -> yaml.nodes.MappingNode:
     return dumper.represent_mapping(
         "!" + execution.__class__.__name__,
@@ -36,7 +36,7 @@ def execution_representer(
 def get_dumper():
     safe_dumper = yaml.SafeDumper
     safe_dumper.add_representer(model.Record, record_representer)
-    for subclass in model.ExecutionFactory.__subclasses__():
+    for subclass in model.AbstractExecution.__subclasses__():
         safe_dumper.add_representer(subclass, execution_representer)
     return safe_dumper
 
@@ -51,7 +51,7 @@ def get_loader():
     loader = yaml.SafeLoader
     loader.add_constructor("!Record", record_constructor)
 
-    for subclass in model.ExecutionFactory.__subclasses__():
+    for subclass in model.AbstractExecution.__subclasses__():
         loader.add_constructor(
             "!" + subclass.__name__,
             lambda loader, node: subclass(**loader.construct_mapping(node)),
@@ -73,7 +73,7 @@ class YamlDataBase:
                     if not isinstance(record, model.Record):
                         raise TypeError(f"Imported record has type {type(record)}")
                     for execution in record.executions:
-                        if not isinstance(execution, model.ExecutionFactory):
+                        if not isinstance(execution, model.AbstractExecution):
                             raise TypeError(
                                 f"Imported execution has type {type(execution)}"
                             )

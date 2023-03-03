@@ -7,7 +7,7 @@ import validators
 import yaml
 from datameta_client import files, metadatasets, submissions
 
-from compagnon.domain.model import ExecutionFactory
+from compagnon.domain.model import AbstractExecution
 
 cogdat_fixtures_path = os.path.join("tests", "fixtures", "cogdat")
 FILE_KEYS = ["RawFQ1", "RawFQ2", "AssemblyFA"]

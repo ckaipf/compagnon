@@ -5,7 +5,7 @@ from typing import Any, Dict
 import requests
 from datameta_client import files
 
-from compagnon.domain.model import ExecutionFactory
+from compagnon.domain.model import AbstractExecution
 
 
 def download_file(url: str, path: str) -> str:
@@ -20,7 +20,7 @@ def download_file(url: str, path: str) -> str:
     return local_filename
 
 
-class SmoothieExecution(ExecutionFactory):
+class SmoothieExecution(AbstractExecution):
     execution_name = "smoothie"
 
     def data_parser(self, record: dict):
@@ -42,5 +42,3 @@ class SmoothieExecution(ExecutionFactory):
 
     def result_parser(self, x) -> Dict[str, Any]:
         return x
-
-

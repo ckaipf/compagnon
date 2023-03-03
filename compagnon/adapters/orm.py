@@ -34,7 +34,7 @@ execution_table = Table(
 
 
 def start_mappers():
-    a = mapper_registry.map_imperatively(model.ExecutionFactory, execution_table)
+    a = mapper_registry.map_imperatively(model.AbstractExecution, execution_table)
     mapper_registry.map_imperatively(
         model.Record,
         record_table,

@@ -3,12 +3,12 @@ import random
 import string
 import unittest
 
-from compagnon.domain.model import ExecutionFactory, Record
+from compagnon.domain.model import AbstractExecution, Record
 
 
 class ModelTestCase(unittest.TestCase):
     def setUp(self):
-        class Addition(ExecutionFactory):
+        class Addition(AbstractExecution):
             execution_name = "addition"
 
             def data_parser(cls, x):
@@ -22,7 +22,7 @@ class ModelTestCase(unittest.TestCase):
 
         self.Addition = Addition
 
-        class Subtraction(ExecutionFactory):
+        class Subtraction(AbstractExecution):
             execution_name = "subtraction"
 
             def data_parser(cls, x):
