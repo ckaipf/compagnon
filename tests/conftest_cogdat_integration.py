@@ -70,22 +70,31 @@ def ensure_metadataset_is_submitted(example_metadatasets):
     for metadataset in example_metadatasets.values():
         if metadataset["IMS-ID"] not in response:
             response = metadatasets.stage(
-                metadata_json=json.dumps(replace_urls_with_file_names(metadataset))
+                metadata_json=json.dumps(replace_urls_with_file_names(metadataset)),
+                quiet=True,
             )
             metadataset_ids = response["id"]["uuid"]
 
             file_ids = [
-                files.stage(path=f)["id"]["uuid"]
+                files.stage(path=f, quiet=True,)[
+                    "id"
+                ]["uuid"]
                 for f in file_paths_of_metadataset(metadataset)
             ]
 
             valid = submissions.prevalidate(
-                metadataset_ids=metadataset_ids, file_ids=file_ids, label="test"
+                metadataset_ids=metadataset_ids,
+                file_ids=file_ids,
+                label="test",
+                quiet=True,
             )
             assert valid, "Submission failed prevalidation."
 
             response = submissions.submit(
-                metadataset_ids=metadataset_ids, file_ids=file_ids, label="test"
+                metadataset_ids=metadataset_ids,
+                file_ids=file_ids,
+                label="test",
+                quiet=True,
             )
     return True
 

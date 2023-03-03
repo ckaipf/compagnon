@@ -33,4 +33,6 @@ class CogdatFetcher(AbstractFetcher):
         raise NotImplementedError
 
     def list(self) -> List[model.Record]:
-        return [self.to_record(raw_record) for raw_record in metadatasets.search()]
+        return [
+            self.to_record(raw_record) for raw_record in metadatasets.search(quiet=True)
+        ]
