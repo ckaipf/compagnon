@@ -14,11 +14,20 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
             for x in range(5)
         ]
         self.yaml_file = "test.yaml"
-        self.addition = model.ExecutionFactory
-        self.addition.add_data_parser(lambda x: x["x"])
-        self.addition.add_command(lambda x: x + 1)
-        self.addition.add_result_parser(lambda x: {"y": x})
-        self.addition.add_execution_name("addition")
+
+        class Addition(model.ExecutionFactory):
+            execution_name = "addition"
+
+            def data_parser(self, x):
+                return x["x"]
+
+            def command(self, x):
+                return x + 1
+
+            def result_parser(self, x):
+                return {"y": x}
+
+        self.Addition = Addition
 
     def tearDown(self):
         os.remove(self.yaml_file)
@@ -33,7 +42,7 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
     def test_add_execution_and_return_result(self):
         uow = unit_of_work.YamlUnitOfWork(self.yaml_file)
         services.add_records(self.records, uow)
-        services.add_execution_to_records(self.addition, uow)
+        services.add_execution_to_records(self.Addition, uow)
         retrived = uow.records
         for record in self.records:
             first_execution = retrived.get(record.foreign_id).executions[0]
@@ -43,7 +52,7 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
     def test_save_and_load_records_with_executions_to_yaml(self):
         uow = unit_of_work.YamlUnitOfWork(self.yaml_file)
         services.add_records(self.records, uow)
-        services.add_execution_to_records(self.addition, uow)
+        services.add_execution_to_records(self.Addition, uow)
         uow.commit()
 
         uow_ = unit_of_work.YamlUnitOfWork(self.yaml_file)

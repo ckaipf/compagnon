@@ -2,6 +2,7 @@ from __future__ import (
     annotations,
 )  # type annotate attribute with the class that does not yet exist (Record)
 
+import abc
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Callable, Dict, List, Optional
@@ -11,15 +12,11 @@ from compagnon.domain.events import Event
 
 
 @dataclass
-class ExecutionFactory:
+class ExecutionFactory(abc.ABC):
     record: Record
     creation_time: date
     execution_id: str = ""
     result: Dict[str, Any] = field(default_factory=dict)
-    execution_name: str = ""
-    command: Callable = lambda x: x
-    result_parser: Callable = lambda x: x
-    data_parser: Callable = lambda x: x
 
     def __post_init__(self):
         self.execution_id = "_".join(
@@ -30,31 +27,31 @@ class ExecutionFactory:
             ]
         )
 
-    @classmethod
-    def add_execution_name(cls, execution_name: str):
-        cls.execution_name = execution_name
+    @property
+    @abc.abstractmethod
+    def execution_name(cls):
+        raise NotImplementedError
 
-    @classmethod
-    def add_command(cls, command: Callable):
-        cls.command = command
+    @abc.abstractclassmethod
+    def command(cls, x):
+        raise NotImplementedError
 
-    @classmethod
-    def add_result_parser(cls, result_parser: Callable):
-        cls.result_parser = result_parser
+    @abc.abstractclassmethod
+    def result_parser(cls, x):
+        raise NotImplementedError
 
-    @classmethod
-    def add_data_parser(cls, data_parser: Callable):
-        cls.data_parser = data_parser
-
-    # def add_execution_id(self, execution_id: str):
-    #     self.execution_id = execution_id
+    @abc.abstractclassmethod
+    def data_parser(cls, x):
+        raise NotImplementedError
 
     def execute(self):
         if self.result:
             raise AttributeError("Execution already executed.")
 
-        self.result = self.__class__.result_parser(
-            self.__class__.command(self.__class__.data_parser(self.record.data))
+        class_ = self.__class__
+
+        self.result = class_.result_parser(
+            self, class_.command(self, class_.data_parser(self, self.record.data))
         )
 
 

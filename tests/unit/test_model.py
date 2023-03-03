@@ -6,36 +6,41 @@ import unittest
 from compagnon.domain.model import ExecutionFactory, Record
 
 
-class AdditionExecutionFactory(ExecutionFactory):
-    pass
-
-
-class SubtractionExecutionFactory(ExecutionFactory):
-    pass
-
-
 class ModelTestCase(unittest.TestCase):
     def setUp(self):
-        self.addition = AdditionExecutionFactory
-        self.addition.add_data_parser(lambda x: x["x"])
-        self.addition.add_command(lambda x: x + 1)
-        self.addition.add_result_parser(lambda x: {"y": x})
+        class Addition(ExecutionFactory):
+            execution_name = "addition"
 
-        self.subtraction = SubtractionExecutionFactory
-        self.subtraction.add_data_parser(lambda x: x["x"])
-        self.subtraction.add_command(lambda x: x - 1)
-        self.subtraction.add_result_parser(lambda x: {"y": x})
+            def data_parser(cls, x):
+                return x["x"]
 
-    def test_configuration_of_execution(self):
-        assert self.addition.data_parser({"x": 1}) == 1
-        assert self.addition.command(1) == 2
-        assert self.addition.result_parser(2) == {"y": 2}
+            def command(cls, x):
+                return x + 1
+
+            def result_parser(cls, x):
+                return {"y": x}
+
+        self.Addition = Addition
+
+        class Subtraction(ExecutionFactory):
+            execution_name = "subtraction"
+
+            def data_parser(cls, x):
+                return x["x"]
+
+            def command(cls, x):
+                return x - 1
+
+            def result_parser(cls, x):
+                return {"y": x}
+
+        self.Subtraction = Subtraction
 
     def test_execution(self):
         record = Record(
             foreign_id="abc", data={"x": 1}, creation_time=datetime.datetime.now()
         )
-        test_addition = self.addition(record, creation_time=datetime.datetime.now())
+        test_addition = self.Addition(record, creation_time=datetime.datetime.now())
         test_addition.execute()
         assert test_addition.result == {"y": 2}
 
@@ -43,7 +48,7 @@ class ModelTestCase(unittest.TestCase):
         record = Record(
             foreign_id="abc", data={"x": 1}, creation_time=datetime.datetime.now()
         )
-        test_addition = self.addition(record, creation_time=datetime.datetime.now())
+        test_addition = self.Addition(record, creation_time=datetime.datetime.now())
         test_addition.execute()
         self.assertRaises(AttributeError, test_addition.execute)
         assert test_addition.result == {"y": 2}
@@ -52,12 +57,13 @@ class ModelTestCase(unittest.TestCase):
         record = Record(
             foreign_id="abc", data={"x": 1}, creation_time=datetime.datetime.now()
         )
-        e = self.addition(record, creation_time=datetime.datetime.now())
+        e = self.Addition(record, creation_time=datetime.datetime.now())
+        print("XX\n", type(e.execution_name), e.execution_name)
         record.add_execution(e)
         e.execute()
         assert record.executions[-1].result == {"y": 2}
 
-        e = self.subtraction(record, creation_time=datetime.datetime.now())
+        e = self.Subtraction(record, creation_time=datetime.datetime.now())
         record.add_execution(e)
         e.execute()
         assert record.executions[-1].result == {"y": 0}

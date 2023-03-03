@@ -20,36 +20,27 @@ def download_file(url: str, path: str) -> str:
     return local_filename
 
 
-#
-#
-#
+class SmoothieExecution(ExecutionFactory):
+    execution_name = "smoothie"
+
+    def data_parser(self, record: dict):
+        return record["file_ids"]
+
+    def command(self, file_ids: Dict[str, Dict[str, str]]):
+        result = dict()
+        for file_name, file_id in file_ids.items():
+            response = files.download_url(file_id["site"])
+            file_url = response["file_url"]
+
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                file_ = download_file(url=file_url, path=tmp_dir)
+                cmd = "echo -n ' puree' >> " + file_
+                subprocess.run(cmd, capture_output=True, shell=True, check=False)
+                proc = subprocess.run(["cat", file_], capture_output=True, check=False)
+                result[file_name] = proc.stdout.decode("utf-8").strip()
+        return result
+
+    def result_parser(self, x) -> Dict[str, Any]:
+        return x
 
 
-def data_parser(record: dict):
-    return record["file_ids"]
-
-
-def command(file_ids: Dict[str, Dict[str, str]]):
-    result = dict()
-    for file_name, file_id in file_ids.items():
-        response = files.download_url(file_id["site"])
-        file_url = response["file_url"]
-
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            file_ = download_file(url=file_url, path=tmp_dir)
-            cmd = "echo -n ' puree' >> " + file_
-            subprocess.run(cmd, capture_output=True, shell=True, check=False)
-            proc = subprocess.run(["cat", file_], capture_output=True, check=False)
-            result[file_name] = proc.stdout.decode("utf-8").strip()
-    return result
-
-
-def result_parser(x) -> Dict[str, Any]:
-    return x
-
-
-SmoothieExecution = ExecutionFactory
-SmoothieExecution.add_data_parser(data_parser)
-SmoothieExecution.add_command(command)
-SmoothieExecution.add_result_parser(result_parser)
-SmoothieExecution.add_execution_name("smoothie_maker")

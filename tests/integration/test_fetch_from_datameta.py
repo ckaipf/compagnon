@@ -22,7 +22,10 @@ def test_cogdat_instance_has_target_metadataset(ensure_metadataset_is_submitted)
         record
         for record in response
         if record.data.get("record").get("IMS-ID")
-        in ["IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXYY","IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXYYY"]
+        in [
+            "IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXYY",
+            "IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXYYY",
+        ]
     ]
     assert target
 

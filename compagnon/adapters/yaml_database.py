@@ -23,12 +23,11 @@ def execution_representer(
     dumper: yaml.SafeDumper, execution: model.ExecutionFactory
 ) -> yaml.nodes.MappingNode:
     return dumper.represent_mapping(
-        "!Execution",
+        "!" + execution.__class__.__name__,
         {
             "execution_id": execution.execution_id,
             "record": execution.record,
             "creation_time": execution.creation_time,
-            "execution_name": execution.execution_name,
             "result": execution.result,
         },
     )
@@ -37,7 +36,8 @@ def execution_representer(
 def get_dumper():
     safe_dumper = yaml.SafeDumper
     safe_dumper.add_representer(model.Record, record_representer)
-    safe_dumper.add_representer(model.ExecutionFactory, execution_representer)
+    for subclass in model.ExecutionFactory.__subclasses__():
+        safe_dumper.add_representer(subclass, execution_representer)
     return safe_dumper
 
 
@@ -47,16 +47,16 @@ def record_constructor(
     return model.Record(**loader.construct_mapping(node))  # type: ignore
 
 
-def execution_constructor(
-    loader: yaml.SafeLoader, node: yaml.nodes.MappingNode
-) -> model.ExecutionFactory:
-    return model.ExecutionFactory(**loader.construct_mapping(node))  # type: ignore
-
-
 def get_loader():
     loader = yaml.SafeLoader
     loader.add_constructor("!Record", record_constructor)
-    loader.add_constructor("!Execution", execution_constructor)
+
+    for subclass in model.ExecutionFactory.__subclasses__():
+        loader.add_constructor(
+            "!" + subclass.__name__,
+            lambda loader, node: subclass(**loader.construct_mapping(node)),
+        )
+
     return loader
 
 
