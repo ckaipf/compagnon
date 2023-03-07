@@ -8,6 +8,8 @@ import compagnon.service_layer.batchables as batchables
 import compagnon.service_layer.services as services
 from compagnon.fetchers.fetchers import CogdatFetcher
 from compagnon.service_layer.executions.smoothie import SmoothieExecution
+from compagnon.service_layer.executions.kraken import KrakenExecution
+
 from compagnon.service_layer.unit_of_work import YamlUnitOfWork
 
 
@@ -35,12 +37,16 @@ def test_cogdat_instance_has_target_metadataset(ensure_metadataset_is_submitted)
     "Skipping test that requires CoGDat instance.",
 )
 class CogdatIntegrationTest(unittest.TestCase):
-    yaml_file = "cogdat_test.yml"
+    
 
     def setUp(self):
         self.ims_ids = [
             "IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXYY",
         ]
+        self.ims_kraken = [
+            "IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXYYY",
+        ]
+        self.yaml_file = "cogdat_test.yml"
         self.uow = YamlUnitOfWork(self.yaml_file)
 
     def tearDown(self):
@@ -68,9 +74,18 @@ class CogdatIntegrationTest(unittest.TestCase):
                 assert record.foreign_id in (record.foreign_id for record in records)
 
     def test_executions_are_committed_to_db(self):
-        records = services.fetch_records(CogdatFetcher())
-        services.add_records(records, self.uow)
+        response = services.fetch_records(CogdatFetcher())
+        
+        target = [
+            record
+            for record in response
+            if record.data.get("record").get("IMS-ID")
+            in self.ims_ids
+            ]
+        
+        services.add_records(target, self.uow)
         services.add_execution_to_records(SmoothieExecution, self.uow)
+        
         with self.uow:
             for record in self.uow.records.list():
                 assert record.executions[-1].__class__ == SmoothieExecution
@@ -85,7 +100,17 @@ class CogdatIntegrationTest(unittest.TestCase):
         assert not services.exist_unseen_records_in_remote(self.uow, CogdatFetcher())
 
     def test_batch_execution(self):
-        services.add_records(self.test_fetch_from_cogdat(), self.uow)
+        response = services.fetch_records(CogdatFetcher())
+        
+        target = [
+            record
+            for record in response
+            if record.data.get("record").get("IMS-ID")
+            in self.ims_ids
+            ]
+        services.add_records(target, self.uow)
+        
+        
         services.add_execution_to_records(SmoothieExecution, self.uow)
         batchables.execute_executions(self.uow)
 
@@ -94,6 +119,21 @@ class CogdatIntegrationTest(unittest.TestCase):
                 assert record.executions[-1].result["RawFQ1"] == "potato puree"
                 assert record.executions[-1].result["RawFQ2"] == "apple puree"
                 assert record.executions[-1].result["AssemblyFA"] == "banana puree"
+    
+    
+    def test_kraken_execution(self):
+            response = services.fetch_records(CogdatFetcher())
+
+            target = [
+            record
+            for record in response
+            if record.data.get("record").get("IMS-ID")
+            in self.ims_kraken
+            ]
+
+            services.add_records(target, self.uow)
+            services.add_execution_to_records(KrakenExecution, self.uow)
+            batchables.execute_executions(self.uow)
 
 
 # def test_compare_local_and_remote(self):
