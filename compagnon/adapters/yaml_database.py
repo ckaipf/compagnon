@@ -51,12 +51,17 @@ def get_loader():
     loader = yaml.SafeLoader
     loader.add_constructor("!Record", record_constructor)
 
-    for subclass in model.AbstractExecution.__subclasses__():
-        loader.add_constructor(
-            "!" + subclass.__name__,
-            lambda loader, node: subclass(**loader.construct_mapping(node)),
-        )
+    subclasses  = model.AbstractExecution.__subclasses__()
+    loader.add_constructor("!" + subclasses[0].__name__, lambda loader, node: subclasses[0](**loader.construct_mapping(node)))
+    loader.add_constructor("!" + subclasses[1].__name__, lambda loader, node: subclasses[1](**loader.construct_mapping(node)))
 
+    # this works not for whatever reason
+    # TODO: try to understand that
+    # for subclass in model.AbstractExecution.__subclasses__():
+    #     loader.add_constructor(
+    #         "!" + subclass.__name__,
+    #         lambda loader, node: subclass(**loader.construct_mapping(node)),
+    #     )
     return loader
 
 
