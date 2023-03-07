@@ -12,12 +12,12 @@ setup(
     install_requires=[
         "datameta-client",
         "pyyaml",
-        "SQLAlchemy",
-        "psycopg2",
+        "sqlalchemy",
+        "flask",
         "psycopg2-binary",
     ],
     extras_require={
         "tests": ["flake8", "pytest", "pytest-cov", "validators"],
-        "KrakenExecution": ["pandas",]
+        "kraken": ["pandas",]
     },
 )
