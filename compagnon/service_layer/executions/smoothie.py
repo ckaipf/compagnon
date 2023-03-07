@@ -1,7 +1,7 @@
 import subprocess
 import tempfile
 from typing import Any, Dict
-
+import re, os
 import requests
 from datameta_client import files
 
@@ -9,14 +9,14 @@ from compagnon.domain.model import AbstractExecution
 
 
 def download_file(url: str, path: str) -> str:
-    local_filename = path + "/" + url.split("/")[-1]
-    # TODO url not exists, path
-    # NOTE the stream=True parameter below
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        with open(local_filename, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+    headers = response.headers['content-disposition']
+    filename = re.findall("filename=(.+)", headers)[0].replace('"', '').replace("'", '')
+    local_filename = os.path.join(path, filename)
+    with open(local_filename, "wb") as file:
+        for chunk in response.iter_content(chunk_size=8192):
+            file.write(chunk)
     return local_filename
 
 
