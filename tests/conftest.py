@@ -3,7 +3,6 @@
 from datetime import datetime
 
 import pytest
-
 # from requests.exceptions import ConnectionError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import clear_mappers, sessionmaker
@@ -60,13 +59,8 @@ def session_factory(in_memory_db):
 #     clear_mappers()
 
 
-#
-#
-#
-
-
-@pytest.fixture()
-def add_one_execution():
+@pytest.fixture(scope="class")
+def dummy_executions(request):
     class Addition(AbstractExecution):
         execution_name = "addition"
 
@@ -79,8 +73,33 @@ def add_one_execution():
         def result_parser(cls, x):
             return {"y": x}
 
-    return Addition
+    class Subtraction(AbstractExecution):
+        execution_name = "subtraction"
 
+        def data_parser(cls, x):
+            return x["x"]
+
+        def command(cls, x):
+            return x - 1
+
+        def result_parser(cls, x):
+            return {"y": x}
+
+    class TimesTwo(AbstractExecution):
+        execution_name = "times_two"
+
+        def data_parser(cls, x):
+            return x["x"]
+
+        def command(cls, x):
+            return x * 2
+
+        def result_parser(cls, x):
+            return {"y": x}
+
+    request.cls.Addition = Addition
+    request.cls.Subtraction = Subtraction
+    request.cls.TimesTwo = TimesTwo
 
 @pytest.fixture()
 def one_record():

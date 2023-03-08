@@ -1,40 +1,15 @@
 import datetime
-import random
-import string
 import unittest
+
+import pytest
 
 from compagnon.domain.model import AbstractExecution, Record
 
 
+@pytest.mark.usefixtures("dummy_executions")
 class ModelTestCase(unittest.TestCase):
     def setUp(self):
-        class Addition(AbstractExecution):
-            execution_name = "addition"
-
-            def data_parser(cls, x):
-                return x["x"]
-
-            def command(cls, x):
-                return x + 1
-
-            def result_parser(cls, x):
-                return {"y": x}
-
-        self.Addition = Addition
-
-        class Subtraction(AbstractExecution):
-            execution_name = "subtraction"
-
-            def data_parser(cls, x):
-                return x["x"]
-
-            def command(cls, x):
-                return x - 1
-
-            def result_parser(cls, x):
-                return {"y": x}
-
-        self.Subtraction = Subtraction
+        pass
 
     def test_execution(self):
         record = Record(
@@ -58,7 +33,6 @@ class ModelTestCase(unittest.TestCase):
             foreign_id="abc", data={"x": 1}, creation_time=datetime.datetime.now()
         )
         e = self.Addition(record, creation_time=datetime.datetime.now())
-        print("XX\n", type(e.execution_name), e.execution_name)
         record.add_execution(e)
         e.execute()
         assert record.executions[-1].result == {"y": 2}
