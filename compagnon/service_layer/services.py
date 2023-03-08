@@ -60,17 +60,17 @@ def exist_unseen_records_in_remote(
         local = set(get_foreign_ids(uow.records.list()))
     retrived = set(get_foreign_ids(fetch_records(fetcher)))
 
-    local_, intersection, retrived_ = (
+    local_truth, intersection, retrived_truth = (
         bool(local - retrived),
         bool(local & retrived),
         bool(retrived - local),
     )
 
-    if local_:
-        raise InvalidLocalState(f"Local records {local_} not in remote")
+    if local_truth:
+        raise InvalidLocalState(f"Local records {local_truth} not in remote")
     if not intersection:
         pass  # TODO: log warning that intersection is empty
-    if retrived_:
+    if retrived_truth:
         return True
     return False
 

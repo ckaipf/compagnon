@@ -33,10 +33,10 @@ class SmoothieExecution(AbstractExecution):
             file_url = response["file_url"]
 
             with tempfile.TemporaryDirectory() as tmp_dir:
-                file_ = download_file(url=file_url, path=tmp_dir)
-                cmd = "echo -n ' puree' >> " + file_
+                file_local = download_file(url=file_url, path=tmp_dir)
+                cmd = "echo -n ' puree' >> " + file_local
                 subprocess.run(cmd, capture_output=True, shell=True, check=False)
-                proc = subprocess.run(["cat", file_], capture_output=True, check=False)
+                proc = subprocess.run(["cat", file_local], capture_output=True, check=False)
                 result[file_name] = proc.stdout.decode("utf-8").strip()
         return result
 

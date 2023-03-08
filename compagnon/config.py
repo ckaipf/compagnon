@@ -29,10 +29,10 @@ def add_config(file_path="config.yml", dict_path=[]):
 
     def decorate(function):
         d = [function.__module__] + dict_path
-        config_ = get_nested(config, d)
+        sub_config = get_nested(config, d)
 
         def wrap_function(*args, **kwargs):
-            kwargs = config_ | kwargs
+            kwargs = sub_config | kwargs
             return function(*args, **kwargs)
 
         return wrap_function

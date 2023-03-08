@@ -44,21 +44,21 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
         services.add_execution_to_records(uow, self.Addition)
         uow.commit()
 
-        uow_ = unit_of_work.YamlUnitOfWork(self.yaml_file)
-        assert id(uow_) != id(uow)
+        uow_other = unit_of_work.YamlUnitOfWork(self.yaml_file)
+        assert id(uow_other) != id(uow)
 
         with self.assertRaises(AttributeError):
-            uow_.records
+            uow_other.records
 
-        with uow_:
+        with uow_other:
             with uow:
-                assert set(services.get_foreign_ids(uow_.records.list())) | set(
+                assert set(services.get_foreign_ids(uow_other.records.list())) | set(
                     services.get_foreign_ids(uow.records.list())
                 )
 
-        for record in uow_.records.list():
-            record_ = uow.records.get(record.foreign_id)
-            assert set(record.get_execution_ids()) | set(record_.get_execution_ids())
+        for record_other in uow_other.records.list():
+            record = uow.records.get(record_other.foreign_id)
+            assert set(record_other.get_execution_ids()) | set(record.get_execution_ids())
 
     def test_add_three_executions_and_ensure_they_are_correctly_loaded_from_yaml(self):
         uow = unit_of_work.YamlUnitOfWork(self.yaml_file)
