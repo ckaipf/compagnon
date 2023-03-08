@@ -31,7 +31,7 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
     def test_add_execution_and_return_result(self):
         uow = unit_of_work.YamlUnitOfWork(self.yaml_file)
         services.add_records(self.records, uow)
-        services.add_execution_to_records(self.Addition, uow)
+        services.add_execution_to_records(uow, self.Addition)
         retrived = uow.records
         for record in self.records:
             first_execution = retrived.get(record.foreign_id).executions[0]
@@ -41,7 +41,7 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
     def test_save_and_load_records_with_executions_to_yaml(self):
         uow = unit_of_work.YamlUnitOfWork(self.yaml_file)
         services.add_records(self.records, uow)
-        services.add_execution_to_records(self.Addition, uow)
+        services.add_execution_to_records(uow, self.Addition)
         uow.commit()
 
         uow_ = unit_of_work.YamlUnitOfWork(self.yaml_file)
@@ -63,9 +63,9 @@ class YamlUnitOfWorkTestCase(unittest.TestCase):
     def test_add_three_executions_and_ensure_they_are_correctly_loaded_from_yaml(self):
         uow = unit_of_work.YamlUnitOfWork(self.yaml_file)
         services.add_records(self.records, uow)
-        services.add_execution_to_records(self.Addition, uow)
-        services.add_execution_to_records(self.Subtraction, uow)
-        services.add_execution_to_records(self.TimesTwo, uow)
+        services.add_execution_to_records(uow, self.Addition)
+        services.add_execution_to_records(uow, self.Subtraction)
+        services.add_execution_to_records(uow, self.TimesTwo)
 
         with uow:
             for record in uow.records.list():

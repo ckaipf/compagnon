@@ -84,7 +84,7 @@ class CogdatIntegrationTest(unittest.TestCase):
             ]
         
         services.add_records(target, self.uow)
-        services.add_execution_to_records(SmoothieExecution, self.uow)
+        services.add_execution_to_records(self.uow, SmoothieExecution)
         
         with self.uow:
             for record in self.uow.records.list():
@@ -111,7 +111,7 @@ class CogdatIntegrationTest(unittest.TestCase):
         services.add_records(target, self.uow)
         
         
-        services.add_execution_to_records(SmoothieExecution, self.uow)
+        services.add_execution_to_records(self.uow, SmoothieExecution)
         batchables.execute_executions(self.uow)
 
         with self.uow:
@@ -132,7 +132,7 @@ class CogdatIntegrationTest(unittest.TestCase):
             ]
 
             services.add_records(target, self.uow)
-            services.add_execution_to_records(KrakenExecution, self.uow)
+            services.add_execution_to_records(self.uow, KrakenExecution)
             batchables.execute_executions(self.uow)
 
 

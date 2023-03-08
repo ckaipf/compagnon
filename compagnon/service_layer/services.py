@@ -36,8 +36,8 @@ def add_records(
 
 
 def add_execution_to_records(
-    execution: model.AbstractExecution,
     uow: AbstractUnitOfWork,
+    execution: model.AbstractExecution,
 ) -> None:
     with uow:
         records = uow.records.list()

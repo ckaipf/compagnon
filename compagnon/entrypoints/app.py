@@ -14,8 +14,8 @@ def test():
     uow = YamlUnitOfWork("test.yml")
     batchables.add_missing_records_from_remote(uow, CogdatFetcher())
     services.add_execution_to_records(
-        KrakenExecution,
         uow,
+        KrakenExecution,
     )
     batchables.execute_executions(uow)
     return
