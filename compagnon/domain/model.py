@@ -1,6 +1,5 @@
-from __future__ import (
-    annotations,
-)  # type annotate attribute with the class that does not yet exist (Record)
+from __future__ import \
+    annotations  # type annotate attribute with the class that does not yet exist (Record)
 
 import abc
 from dataclasses import dataclass, field
