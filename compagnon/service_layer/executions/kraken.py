@@ -1,13 +1,14 @@
-import subprocess
 import tempfile
 from typing import Any, Dict
+import pathlib
 
 import pandas
 
 from compagnon import config as config
 from compagnon.domain.model import AbstractExecution
 from compagnon.fetchers.fetchers import CogdatFetcher
-import pathlib
+from compagnon.service_layer.external_process import SubprocessProcess
+
 
 def parse_kraken_result_file(path: str, kwargs) -> pandas.DataFrame:
     fieldnames = [
@@ -40,7 +41,6 @@ class KrakenExecution(AbstractExecution):
             file_1 = fetcher.get_file(self.record, lambda x: x.data["file_ids"]["RawFQ1"]["site"], path_prefix=tmp_dir)
             file_2 = fetcher.get_file(self.record, lambda x: x.data["file_ids"]["RawFQ2"]["site"], path_prefix=tmp_dir)
 
-
             report_file = tmp_dir / "kraken2.report.txt"
             paired = True
 
@@ -50,13 +50,10 @@ class KrakenExecution(AbstractExecution):
             --report {report_file} \
             {"--paired" if paired else " "} \
             {str(file_1) + " " + str(file_2) if paired else str(file_1)} \
-            > /dev/null 2>&1 \
+            > /dev/null \
             """
 
-            p = subprocess.run(cmd, capture_output=True, shell=True, check=False)
-
-            # TODO: error handling, p.stderr.decode('utf-8').strip()
-
+            SubprocessProcess(cmd).run()
             df = parse_kraken_result_file(report_file, kwargs)
 
         #

@@ -6,6 +6,7 @@ from compagnon.domain.model import AbstractExecution
 from compagnon.fetchers.fetchers import CogdatFetcher
 import pathlib
 
+from compagnon.service_layer.external_process import SubprocessProcess
 
 class SmoothieExecution(AbstractExecution):
     execution_name = "smoothie"
@@ -21,12 +22,9 @@ class SmoothieExecution(AbstractExecution):
             tmp_dir = pathlib.Path(tmp_dir)
             
             for file in ["RawFQ1", "RawFQ2", "AssemblyFA"]:
-                file_local = fetcher.get_file(self.record, lambda x: x.data["file_ids"][file]["site"], path_prefix=tmp_dir)
-
-                cmd = "echo -n ' puree' >> " + str(file_local)
-                subprocess.run(cmd, capture_output=True, shell=True, check=False)
-                proc = subprocess.run(["cat", str(file_local)], capture_output=True, check=False)
-                result[file] = proc.stdout.decode("utf-8").strip()
+                file_local = fetcher.get_file(self.record, lambda x: x.data["file_ids"][file]["site"], path_prefix=tmp_dir)              
+                SubprocessProcess("echo -n ' puree' >> " + str(file_local)).run()
+                result[file] = SubprocessProcess("cat " + str(file_local)).run()
         
         return result
 
