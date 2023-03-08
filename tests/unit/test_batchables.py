@@ -1,9 +1,6 @@
 import unittest
 
-from compagnon.domain import model
 from compagnon.service_layer import batchables
-
-# from typing
 
 
 class Batachable(unittest.TestCase):
