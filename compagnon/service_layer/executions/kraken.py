@@ -1,16 +1,13 @@
-import os
-import re
 import subprocess
 import tempfile
 from typing import Any, Dict
 
 import pandas
-import requests
-from datameta_client import files
 
 from compagnon import config as config
 from compagnon.domain.model import AbstractExecution
-
+from compagnon.fetchers.fetchers import CogdatFetcher
+import pathlib
 
 def parse_kraken_result_file(path: str, kwargs) -> pandas.DataFrame:
     fieldnames = [
@@ -21,46 +18,30 @@ def parse_kraken_result_file(path: str, kwargs) -> pandas.DataFrame:
     ]
     dypes = {
         v["fieldname"]: v["dtype"]
-        for k, v in kwargs["kraken_result_file_fields"].items()
+        for _, v in kwargs["kraken_result_file_fields"].items()
     }
     df = pandas.read_csv(path, delimiter="\t", names=fieldnames, dtype=dypes)
     return df
 
 
-def download_file(url: str, path: str) -> str:
-    response = requests.get(url, stream=True)
-    response.raise_for_status()
-    headers = response.headers["content-disposition"]
-    filename = re.findall("filename=(.+)", headers)[0].replace('"', "").replace("'", "")
-    local_filename = os.path.join(path, filename)
-    with open(local_filename, "wb") as file:
-        for chunk in response.iter_content(chunk_size=8192):
-            file.write(chunk)
-    return local_filename
-
-
 class KrakenExecution(AbstractExecution):
     execution_name = "kraken"
-
-    def __init__(self, *args, **kwargs):
-        super(KrakenExecution, self).__init__(*args, **kwargs)
 
     def data_parser(self, record: dict):
         return record["file_ids"]
 
     @config.add_config()
     def command(self, file_ids: Dict[str, Dict[str, str]], **kwargs):
-        file_urls = dict()
-
-        for file_name, file_id in file_ids.items():
-            response = files.download_url(file_id["site"])
-            file_urls[file_name] = response["file_url"]
+        fetcher = CogdatFetcher()
 
         with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_dir = "/tmp/test"
-            file_1 = download_file(url=file_urls["RawFQ1"], path=tmp_dir)
-            file_2 = download_file(url=file_urls["RawFQ2"], path=tmp_dir)
-            report_file = os.path.join(tmp_dir, "kraken2.report.txt")
+            tmp_dir = pathlib.Path(tmp_dir)
+            
+            file_1 = fetcher.get_file(self.record, lambda x: x.data["file_ids"]["RawFQ1"]["site"], path_prefix=tmp_dir)
+            file_2 = fetcher.get_file(self.record, lambda x: x.data["file_ids"]["RawFQ2"]["site"], path_prefix=tmp_dir)
+
+
+            report_file = tmp_dir / "kraken2.report.txt"
             paired = True
 
             cmd = f"""
@@ -68,7 +49,7 @@ class KrakenExecution(AbstractExecution):
             --db {kwargs["kraken_db"]}  \
             --report {report_file} \
             {"--paired" if paired else " "} \
-            {file_1 + " " + file_2 if paired else file_1} \
+            {str(file_1) + " " + str(file_2) if paired else str(file_1)} \
             > /dev/null 2>&1 \
             """
 

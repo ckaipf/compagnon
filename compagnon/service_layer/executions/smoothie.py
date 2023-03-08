@@ -1,23 +1,10 @@
 import subprocess
 import tempfile
 from typing import Any, Dict
-import re, os
-import requests
-from datameta_client import files
 
 from compagnon.domain.model import AbstractExecution
-
-
-def download_file(url: str, path: str) -> str:
-    response = requests.get(url, stream=True)
-    response.raise_for_status()
-    headers = response.headers['content-disposition']
-    filename = re.findall("filename=(.+)", headers)[0].replace('"', '').replace("'", '')
-    local_filename = os.path.join(path, filename)
-    with open(local_filename, "wb") as file:
-        for chunk in response.iter_content(chunk_size=8192):
-            file.write(chunk)
-    return local_filename
+from compagnon.fetchers.fetchers import CogdatFetcher
+import pathlib
 
 
 class SmoothieExecution(AbstractExecution):
@@ -27,17 +14,20 @@ class SmoothieExecution(AbstractExecution):
         return record["file_ids"]
 
     def command(self, file_ids: Dict[str, Dict[str, str]]):
+        fetcher = CogdatFetcher()
         result = dict()
-        for file_name, file_id in file_ids.items():
-            response = files.download_url(file_id["site"])
-            file_url = response["file_url"]
 
-            with tempfile.TemporaryDirectory() as tmp_dir:
-                file_local = download_file(url=file_url, path=tmp_dir)
-                cmd = "echo -n ' puree' >> " + file_local
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_dir = pathlib.Path(tmp_dir)
+            
+            for file in ["RawFQ1", "RawFQ2", "AssemblyFA"]:
+                file_local = fetcher.get_file(self.record, lambda x: x.data["file_ids"][file]["site"], path_prefix=tmp_dir)
+
+                cmd = "echo -n ' puree' >> " + str(file_local)
                 subprocess.run(cmd, capture_output=True, shell=True, check=False)
-                proc = subprocess.run(["cat", file_local], capture_output=True, check=False)
-                result[file_name] = proc.stdout.decode("utf-8").strip()
+                proc = subprocess.run(["cat", str(file_local)], capture_output=True, check=False)
+                result[file] = proc.stdout.decode("utf-8").strip()
+        
         return result
 
     def result_parser(self, x) -> Dict[str, Any]:
