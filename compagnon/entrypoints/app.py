@@ -1,13 +1,12 @@
 import typer
 
-app = typer.Typer()
-
 import compagnon.service_layer.batchables as batchables
 import compagnon.service_layer.services as services
 from compagnon.fetchers.fetchers import CogdatFetcher
 from compagnon.service_layer.executions.kraken import KrakenExecution
 from compagnon.service_layer.unit_of_work import YamlUnitOfWork
 
+app = typer.Typer()
 
 @app.command()
 def test():
