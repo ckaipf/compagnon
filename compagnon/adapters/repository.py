@@ -27,7 +27,8 @@ class AbstractRepository(abc.ABC):
 
     @abc.abstractmethod
     def list(self):
-        pass
+        raise NotImplementedError
+
 
 
 class DictRepository(AbstractRepository):
