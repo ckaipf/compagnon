@@ -1,0 +1,22 @@
+second:
+  IMS-ID: IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXYY
+  RawFQ1: test_file_1.fastq.gz
+  RawFQ2: test_file_2.fastq.gz 
+  AssemblyFA: test_file_assembly.fasta
+  SeqPlatform: ILLUMINA
+  AmpKit: COVIDSeq
+  SampleDate: "2022-01-01"
+  AGS-5: 12345
+  Lab-ENA-ID: ERS000002
+
+third:
+  IMS-ID: IMS-12345-CVDP-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXYYY
+  RawFQ1: https://ftp.sra.ebi.ac.uk/vol1/fastq/ERR100/000/ERR10000000/ERR10000000_1.fastq.gz
+  RawFQ2: https://ftp.sra.ebi.ac.uk/vol1/fastq/ERR100/000/ERR10000000/ERR10000000_2.fastq.gz 
+  AssemblyFA: test_file_assembly_1.fasta
+  SeqPlatform: ILLUMINA
+  AmpKit: COVIDSeq
+  SampleDate: "2022-01-01"
+  AGS-5: 12345
+  Lab-ENA-ID: ERS000003
+

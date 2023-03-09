@@ -1,0 +1,43 @@
+compagnon.service_layer.executions.kraken:
+  kraken_binary: /opt/kraken2-2.0.8-beta/kraken2
+  kraken_db: /var/local/encrypted_volume/kraken2_dbs
+  sars_cov_ids:
+    - 694009 # S Severe acute respiratory syndrome-related coronavirus
+    - 2697049 # S1 Severe acute respiratory syndrome coronavirus 2
+  homo_sapiens_ids:
+    - 9605 # G Homo
+    - 9606 # S Homo sapiens
+  kraken_result_file_fields:
+    0: 
+      fieldname: pct
+      dtype: Float64
+      description: |
+        Percentage of fragments covered by the clade rooted at this taxon
+    1: 
+      fieldname: n_clade
+      dtype: Int64
+      description: |
+        Number of fragments covered by the clade rooted at this taxon
+    2: 
+      fieldname: n_taxon
+      dtype: Int64
+      description: |
+        Number of fragments assigned directly to this taxon
+    3: 
+      fieldname: rank_code
+      dtype: string
+      description: |
+        A rank code, indicating (U)nclassified, (R)oot, (D)omain, (K)ingdom, (P)hylum, (C)lass, (O)rder, (F)amily, (G)enus, or (S)pecies.
+        Taxa that are not at any of these 10 ranks have a rank code that is formed by using the rank code of the closest ancestor rank with
+        a number indicating the distance from that rank. E.g., "G2" is a rank code indicating a taxon is between genus and species and the 
+        grandparent taxon is at the genus rank.
+    4: 
+      fieldname: ncbi_id
+      dtype: Int64
+      description: |
+        NCBI taxonomic ID number
+    5: 
+      fieldname: scientific_name
+      dtype: string
+      description: |
+        Indented scientific name
