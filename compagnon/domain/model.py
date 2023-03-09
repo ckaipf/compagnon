@@ -1,5 +1,6 @@
-from __future__ import \
-    annotations  # type annotate attribute with the class that does not yet exist (Record)
+from __future__ import (
+    annotations,
+)  # type annotate attribute with the class that does not yet exist (Record)
 
 import abc
 from dataclasses import dataclass, field
@@ -32,15 +33,7 @@ class AbstractExecution(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractclassmethod
-    def command(cls, x):
-        raise NotImplementedError
-
-    @abc.abstractclassmethod
-    def result_parser(cls, x):
-        raise NotImplementedError
-
-    @abc.abstractclassmethod
-    def data_parser(cls, x):
+    def command(cls, **kwargs):
         raise NotImplementedError
 
     def execute(self):
@@ -48,10 +41,7 @@ class AbstractExecution(abc.ABC):
             raise AttributeError("Execution already executed.")
 
         class_ = self.__class__
-
-        self.result = class_.result_parser(
-            self, class_.command(self, class_.data_parser(self, self.record.data))
-        )
+        self.result = class_.command(self, self.record.data)
 
 
 @dataclass

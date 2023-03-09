@@ -1,6 +1,6 @@
+import pathlib
 import tempfile
 from typing import Any, Dict
-import pathlib
 
 import pandas
 
@@ -28,18 +28,23 @@ def parse_kraken_result_file(path: str, kwargs) -> pandas.DataFrame:
 class KrakenExecution(AbstractExecution):
     execution_name = "kraken"
 
-    def data_parser(self, record: dict):
-        return record["file_ids"]
-
     @config.add_config()
-    def command(self, file_ids: Dict[str, Dict[str, str]], **kwargs):
+    def command(self, **kwargs):
         fetcher = CogdatFetcher()
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_dir = pathlib.Path(tmp_dir)
-            
-            file_1 = fetcher.get_file(self.record, lambda x: x.data["file_ids"]["RawFQ1"]["site"], path_prefix=tmp_dir)
-            file_2 = fetcher.get_file(self.record, lambda x: x.data["file_ids"]["RawFQ2"]["site"], path_prefix=tmp_dir)
+
+            file_1 = fetcher.get_file(
+                self.record,
+                lambda x: x.data["file_ids"]["RawFQ1"]["site"],
+                path_prefix=tmp_dir,
+            )
+            file_2 = fetcher.get_file(
+                self.record,
+                lambda x: x.data["file_ids"]["RawFQ2"]["site"],
+                path_prefix=tmp_dir,
+            )
 
             report_file = tmp_dir / "kraken2.report.txt"
             paired = True
@@ -71,6 +76,3 @@ class KrakenExecution(AbstractExecution):
         return {
             "kraken_db": kwargs["kraken_db"],
         } | queries_truth
-
-    def result_parser(self, result) -> Dict[str, Any]:
-        return result

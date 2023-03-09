@@ -64,42 +64,29 @@ def dummy_executions(request):
     class Addition(AbstractExecution):
         execution_name = "addition"
 
-        def data_parser(cls, x):
-            return x["x"]
 
         def command(cls, x):
-            return x + 1
+            return {"y": x["x"] + 1}
 
-        def result_parser(cls, x):
-            return {"y": x}
 
     class Subtraction(AbstractExecution):
         execution_name = "subtraction"
 
-        def data_parser(cls, x):
-            return x["x"]
 
         def command(cls, x):
-            return x - 1
+            return {"y": x["x"] - 1}
 
-        def result_parser(cls, x):
-            return {"y": x}
 
     class TimesTwo(AbstractExecution):
         execution_name = "times_two"
 
-        def data_parser(cls, x):
-            return x["x"]
-
         def command(cls, x):
-            return x * 2
-
-        def result_parser(cls, x):
-            return {"y": x}
+            return {"y": x["x"] * 2}
 
     request.cls.Addition = Addition
     request.cls.Subtraction = Subtraction
     request.cls.TimesTwo = TimesTwo
+
 
 @pytest.fixture()
 def one_record():
